@@ -50,7 +50,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Name'
+              $ref: '#/components/schemas/JsonName'
       responses:
         '200':
           description: Successful operation
@@ -158,6 +158,12 @@ components:
       
     Beschreibung:
       type: string
+    
+    JsonName:
+      type: object
+      properties:
+        Name:
+          $ref: '#/components/schemas/Name'
     
     List:
       type: object
