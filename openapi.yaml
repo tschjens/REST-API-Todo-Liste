@@ -1,0 +1,196 @@
+openapi: 3.0.3
+info:
+  title: Todoliste - OpenAPI 3.0
+  description: Server-API für Todo-Liste
+  version: '1.0'
+servers:
+  - url: http://127.0.0.1:5000
+paths:
+  /todo-list/{list_id}:
+    get:
+      summary: Liefert alle Einträge einer Todo-Liste zurück
+      description: ...
+      parameters:
+        - in: path
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/list_id'
+          description: ID der Liste
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/List'
+        '404':
+          description: Liste nicht gefunden
+    delete:
+      summary: Löscht eine komplette Todo-Liste mit allen Einträgen
+      parameters:
+        - in: path
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/list_id'
+          description: ID der Liste
+      responses:
+        '200':
+          description: Löschen erfolgreich
+        '404':
+          description: Liste nicht gefunden
+      
+  /todo-list:
+    post:
+      summary: Fügt eine neue Todo-Liste hinzu
+      description: ...
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Name'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateList'
+          
+  /todo-list/{list_id}/entry:
+    post:
+      summary: Fügt einen Eintrag zu einer bestehenden Todo-Liste hinzu
+      description: ...
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EntryInput'
+      parameters:
+        - in: path
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/list_id'
+          description: ID der Liste
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '404':
+          description: Liste nicht gefunden
+      
+  /todo-list/{list_id}/entry/{entry_id}:
+    put:
+      summary: Aktualisiert einen bestehenden Eintrag
+      description: ...
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EntryInput'
+      parameters:
+        - in: path
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/list_id'
+          description: ID der Liste
+        - in: path
+          name: entry_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/entry_id'
+          description: ID des Eintrags
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '400':
+          description: fehlerhafte Daten
+        '404':
+          description: Liste oder Eintrag nicht gefunden
+      
+    delete:
+      summary: Löscht einen einzelnen Eintrag einer Todo-Liste.
+      description: ...
+      parameters:
+        - in: path
+          name: list_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/list_id'
+          description: ID der Liste
+        - in: path
+          name: entry_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/entry_id'
+          description: ID des Eintrags
+      responses:
+        '200':
+          description: Löschen erfolgreich
+        '404':
+          description: Liste oder Eintrag nicht gefunden
+
+components:
+  schemas:
+    list_id:
+      type: string
+      format: UUID
+      
+    entry_id:
+      type: string
+      format: UUID
+      
+    Name:
+      type: string
+      
+    Beschreibung:
+      type: string
+    
+    List:
+      type: object
+      properties:
+        Name:
+          $ref: '#/components/schemas/Name'
+        Entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
+          
+    Entry:
+      type: object
+      properties:
+        Name:
+          $ref: '#/components/schemas/Name'
+        Beschreibung:
+          $ref: '#/components/schemas/Beschreibung'
+        entry_id:
+          $ref: '#/components/schemas/entry_id'
+          
+    CreateList:
+      type: object
+      properties:
+        list_id: 
+          $ref: '#/components/schemas/list_id'
+        Name:
+          $ref: '#/components/schemas/Name'
+          
+    EntryInput:
+      type: object
+      properties:
+        Name:
+          $ref: '#/components/schemas/Name'
+        Beschreibung:
+          $ref: '#/components/schemas/Beschreibung'
