@@ -34,7 +34,7 @@ todos = [
     {'id': todo_1_id, 'name': 'Milch', 'description': '', 'list': todo_list_1_id},
     {'id': todo_2_id, 'name': 'Arbeitsblätter ausdrucken', 'description': '', 'list': todo_list_2_id},
     {'id': todo_3_id, 'name': 'Kinokarten kaufen', 'description': '', 'list': todo_list_3_id},
-    {'id': todo_3_id, 'name': 'Eier', 'description': '', 'list': todo_list_1_id},
+    {'id': todo_4_id, 'name': 'Eier', 'description': '', 'list': todo_list_1_id},
 ]
 
 # add some headers to allow cross origin access to the API on this server, necessary for using preview in Swagger Editor!
@@ -46,7 +46,7 @@ def apply_cors_header(response):
     return response
 
 # define endpoint for getting and deleting existing todo lists
-@app.route('/todo-list/<list_id>', methods=['GET', 'DELETE'])
+@app.route('/list/<list_id>', methods=['GET', 'DELETE'])
 def handle_list(list_id):
     # find todo list depending on given list id
     list_item = None
@@ -69,7 +69,7 @@ def handle_list(list_id):
 
 
 # define endpoint for adding a new list
-@app.route('/todo-list', methods=['POST'])
+@app.route('/list', methods=['POST'])
 def add_new_list():
     # make JSON from POST data (even if content type is not set correctly)
     new_list = request.get_json(force=True)
@@ -85,57 +85,40 @@ def add_new_list():
 def get_all_lists():
     return jsonify(todo_lists)
 
-# define endpoint for creating entries
-@app.route('/todo-list/<list_id>/entry', methods=['POST'])
-def add_new_entry(list_id):
+# define endpoint for getting and deleting entries
+@app.route('/todo-list/<list_id>/entry/<entry_id>', methods=['PUT', 'DELETE'])
+def handle_list_entry(list_id, entry_id):
     # find todo list depending on given list id
-    list_item = None
+    entry_item = None
+    list_item  = None
     for l in todo_lists:
         if l['id'] == list_id:
             list_item = l
-            break
+            for t in todos:
+                if  t['id'] == entry_id:
+                    entry_item = t
+                    break
+            if not entry_item:
+                abort(404)
     # if the given list id is invalid, return status code 404
     if not list_item:
         abort(404)
-    if request.method == 'POST':
+    
+    if request.method == 'PUT':
+        # find all todo entries for the todo list with the given id
         new_entry = request.get_json(force=True)
         print('Got new list to be added: {}'.format(new_entry))
-        # create id for new list, save it and return the list with id
+            # create id for new list, save it and return the list with id
         new_entry['id'] = uuid.uuid4()
         new_entry['list'] = list_item['id']
         todos.append(new_entry)
         return jsonify(new_entry), 200
-
-# define endpoint for getting and deleting entries
-@app.route('/todo-list/<list_id>/entry/<entry_id>', methods=['PUT', 'DELETE'])
-def handle_entry(list_id,entry_id):
-    # find todo list depending on given list id
-    list_item = None
-    for l in todo_lists:
-        if l['id'] == list_id:
-            list_item = l
-            break
-    # if the given list id is invalid, return status code 404
-    if not list_item:
-        abort(404)
-    else:
-        entry_item = None
-        for i in todos:
-            if i['id'] == entry_id:
-                entry_item = i
-                break
-        if not entry_item:
-            abort(404)
-        else:
-            if request.method == 'PUT':
-            # find all todo entries for the todo list with the given id
-                print('Returning todo list...')
-                return jsonify([i for i in todos if i['list'] == list_id])
-            elif request.method == 'DELETE':
-            # delete list with given id
-                print('Deleting todo list...')
-                todo_lists.remove(list_item)
-                return '', 200
+       
+    elif request.method == 'DELETE':
+        # delete list with given id
+        print('Deleting todo list entry...')
+        todo_lists.remove(entry_item)
+        return '', 200
 
 if __name__ == '__main__':
     # start Flask server
